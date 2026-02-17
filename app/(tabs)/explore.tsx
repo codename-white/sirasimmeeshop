@@ -1,112 +1,237 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter, Stack } from 'expo-router';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+const { width } = Dimensions.get('window');
 
-export default function TabTwoScreen() {
+const CATEGORIES = [
+  { id: '1', name: 'เสื้อผ้า (Apparel)', icon: 'shirt-outline', color: '#FFEBEE' },
+  { id: '2', name: 'สติกเกอร์ (Stickers)', icon: 'copy-outline', color: '#E3F2FD' },
+  { id: '3', name: 'ของสะสม (Collectibles)', icon: 'diamond-outline', color: '#F3E5F5' },
+  { id: '4', name: 'เครื่องประดับ (Accs)', icon: 'watch-outline', color: '#E8F5E9' },
+  { id: '5', name: 'ทั้งหมด (All Items)', icon: 'apps-outline', color: '#FFF3E0' },
+];
+
+const TRENDING_KEYWORDS = ['MITH', 'Sticker', 'Limited', 'สติกเกอร์', 'เสื้อ'];
+
+export default function ExploreScreen() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
+  const renderCategory = ({ item }: { item: typeof CATEGORIES[0] }) => (
+    <TouchableOpacity 
+      style={styles.categoryCard} 
+      onPress={() => alert(`คัดกรองหมวดหมู่ ${item.name} ครับ`)}
+    >
+      <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
+        <Ionicons name={item.icon as any} size={28} color="#333" />
+      </View>
+      <Text style={styles.categoryName} numberOfLines={1}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Stack.Screen options={{ title: 'ค้นหา', headerTitleAlign: 'center' }} />
+      
+      {/* Search Bar */}
+      <View style={styles.searchHeader}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#999" />
+          <TextInput
+            style={styles.input}
+            placeholder="ค้นหาสินค้าที่ต้องการ..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color="#999" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        {/* Trending Keywords */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>คำค้นหายอดนิยม</Text>
+          <View style={styles.keywordContainer}>
+            {TRENDING_KEYWORDS.map((word, index) => (
+              <TouchableOpacity key={index} style={styles.keywordBadge} onPress={() => setSearchQuery(word)}>
+                <Text style={styles.keywordText}>{word}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Categories Grid */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>หมวดหมู่สินค้า</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>ดูทั้งหมด</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={CATEGORIES}
+            renderItem={renderCategory}
+            keyExtractor={(item) => item.id}
+            numColumns={3}
+            scrollEnabled={false}
+            columnWrapperStyle={styles.categoryRow}
+          />
+        </View>
+
+        {/* Promotion Banner Placeholder */}
+        <TouchableOpacity style={styles.promoBanner}>
+          <View style={styles.promoContent}>
+            <Text style={styles.promoTitle}>New Collection 2026</Text>
+            <Text style={styles.promoSubtitle}>สติกเกอร์ MITH รุ่นใหม่ล่าสุด พร้อมวางจำหน่ายแล้วที่นี่!</Text>
+            <View style={styles.shopNowBtn}>
+              <Text style={styles.shopNowText}>เลือกซื้อเลย</Text>
+            </View>
+          </View>
+          <View style={styles.promoIcon}>
+            <Ionicons name="rocket-outline" size={80} color="rgba(255,255,255,0.3)" />
+          </View>
+        </TouchableOpacity>
+
+        <View style={styles.footerSpacing} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  titleContainer: {
+  searchHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  searchBar: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  input: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  content: {
+    padding: 20,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  keywordContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  keywordBadge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  keywordText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  categoryRow: {
+    justifyContent: 'flex-start',
+    gap: 10,
+  },
+  categoryCard: {
+    width: (width - 60) / 3,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  categoryName: {
+    fontSize: 12,
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  seeAll: {
+    color: '#E91E63',
+    fontWeight: '600',
+  },
+  promoBanner: {
+    backgroundColor: '#E91E63',
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    marginTop: 10,
+  },
+  promoContent: {
+    flex: 1,
+    zIndex: 1,
+  },
+  promoTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  promoSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    marginBottom: 15,
+  },
+  shopNowBtn: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  shopNowText: {
+    color: '#E91E63',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  promoIcon: {
+    position: 'absolute',
+    right: -20,
+    bottom: -10,
+  },
+  footerSpacing: {
+    height: 50,
   },
 });
