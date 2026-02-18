@@ -203,7 +203,7 @@ export default function ProfileScreen() {
               <Text style={[styles.socialLabel, { color: Colors[theme].subtext }]}>Facebook</Text>
             </TouchableOpacity>
  
-            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocialLink('https://www.instagram.com/gapbo/')}>
+            <TouchableOpacity style={styles.socialBtn} onPress={() => Linking.openURL('https://www.instagram.com/gapbo/')}>
               <View style={[styles.socialIconBox, { backgroundColor: '#E4405F' }]}>
                 <Ionicons name="logo-instagram" size={24} color="#fff" />
               </View>
