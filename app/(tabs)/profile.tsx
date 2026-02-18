@@ -61,19 +61,7 @@ export default function ProfileScreen() {
 
   const openSocialLink = async (url: string) => {
     try {
-      if (url.includes('instagram.com')) {
-        const match = url.match(/instagram\.com\/([^/?#]+)/);
-        const username = match?.[1];
-        
-        if (username) {
-          const appUrl = `instagram://user?username=${username}`;
-          const supported = await Linking.canOpenURL(appUrl);
-          if (supported) {
-            await Linking.openURL(appUrl);
-            return;
-          }
-        }
-      }
+      // Use direct URL opening to allow OS to handle Universal/App Links correctly
       await Linking.openURL(url);
     } catch (err) {
       console.error("Couldn't load page", err);
