@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useCartStore } from '../src/store/useCartStore';
-import { supabase } from '../src/services/supabase';
-import { useRouter, Stack } from 'expo-router';
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { supabase } from '../src/services/supabase';
+import { useCartStore } from '../src/store/useCartStore';
+import { useThemeStore } from '../src/store/useThemeStore';
 
 export default function CheckoutScreen() {
+  const { theme } = useThemeStore();
   const { items, totalPrice, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -20,6 +23,11 @@ export default function CheckoutScreen() {
   const handlePlaceOrder = async () => {
     if (!user) {
       Alert.alert('ผิดพลาด', 'กรุณาเข้าสู่ระบบก่อนสั่งซื้อครับ');
+      return;
+    }
+
+    if (items.length === 0) {
+      Alert.alert('ผิดพลาด', 'ไม่พบสินค้าในตะกร้าครับ');
       return;
     }
 
@@ -72,48 +80,54 @@ export default function CheckoutScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: 'ยืนยันการสั่งซื้อ', headerTitleAlign: 'center' }} />
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <Stack.Screen options={{ 
+        title: 'ยืนยันการสั่งซื้อ', 
+        headerTitleAlign: 'center',
+        headerStyle: { backgroundColor: Colors[theme].background },
+        headerTintColor: Colors[theme].text,
+        headerShadowVisible: false,
+      }} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>รายการสินค้า</Text>
+        <View style={[styles.section, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>รายการสินค้า</Text>
           {items.map((item) => (
             <View key={item.id} style={styles.itemRow}>
-              <Text style={styles.itemName}>{item.name} x {item.quantity}</Text>
-              <Text style={styles.itemPrice}>{(item.price * item.quantity).toLocaleString()} ฿</Text>
+              <Text style={[styles.itemName, { color: Colors[theme].text }]}>{item.name} x {item.quantity}</Text>
+              <Text style={[styles.itemPrice, { color: Colors[theme].text }]}>{(item.price * item.quantity).toLocaleString()} ฿</Text>
             </View>
           ))}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ที่อยู่จัดส่ง</Text>
-          <View style={styles.addressBox}>
-            <Ionicons name="location-outline" size={20} color="#666" />
-            <Text style={styles.addressText}>{user?.email || 'กำลังโหลดข้อมูล...'}</Text>
+        <View style={[styles.section, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>ที่อยู่จัดส่ง</Text>
+          <View style={[styles.addressBox, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : '#F5F5F5' }]}>
+            <Ionicons name="location-outline" size={20} color={Colors[theme].subtext} />
+            <Text style={[styles.addressText, { color: Colors[theme].text }]}>{user?.email || 'กำลังโหลดข้อมูล...'}</Text>
           </View>
-          <Text style={styles.addressNote}>* ปล. ระบบจะใช้ที่อยู่เริ่มต้นที่ตั้งค่าไว้ในโปรไฟล์ครับ</Text>
+          <Text style={[styles.addressNote, { color: Colors[theme].subtext }]}>* ปล. ระบบจะใช้ที่อยู่เริ่มต้นที่ตั้งค่าไว้ในโปรไฟล์ครับ</Text>
         </View>
 
-        <View style={styles.summarySection}>
+        <View style={[styles.summarySection, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>ยอดรวมสินค้า</Text>
-            <Text style={styles.summaryValue}>{totalPrice().toLocaleString()} ฿</Text>
+            <Text style={[styles.summaryLabel, { color: Colors[theme].subtext }]}>ยอดรวมสินค้า</Text>
+            <Text style={[styles.summaryValue, { color: Colors[theme].text }]}>{totalPrice().toLocaleString()} ฿</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>ค่าจัดส่ง</Text>
-            <Text style={styles.summaryValue}>ฟรี</Text>
+            <Text style={[styles.summaryLabel, { color: Colors[theme].subtext }]}>ค่าจัดส่ง</Text>
+            <Text style={[styles.summaryValue, { color: Colors[theme].text }]}>ฟรี</Text>
           </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>ยอดชำระสุทธิ</Text>
-            <Text style={styles.totalValue}>{totalPrice().toLocaleString()} ฿</Text>
+          <View style={[styles.summaryRow, styles.totalRow, { borderTopColor: Colors[theme].divider }]}>
+            <Text style={[styles.totalLabel, { color: Colors[theme].text }]}>ยอดชำระสุทธิ</Text>
+            <Text style={[styles.totalValue, { color: Colors[theme].tint }]}>{totalPrice().toLocaleString()} ฿</Text>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: Colors[theme].card, borderTopColor: Colors[theme].divider }]}>
         <TouchableOpacity 
-          style={[styles.confirmButton, loading && styles.buttonDisabled]} 
+          style={[styles.confirmButton, loading && styles.buttonDisabled, { backgroundColor: Colors[theme].tint }]} 
           onPress={handlePlaceOrder}
           disabled={loading}
         >
@@ -131,23 +145,21 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
   },
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
   },
   section: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
+    borderWidth: 1,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 16,
+    fontFamily: 'Kanit_700Bold',
   },
   itemRow: {
     flexDirection: 'row',
@@ -156,36 +168,34 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 16,
-    color: '#666',
     flex: 1,
+    fontFamily: 'Kanit_400Regular',
   },
   itemPrice: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontFamily: 'Kanit_700Bold',
   },
   addressBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
     padding: 12,
     borderRadius: 8,
   },
   addressText: {
     marginLeft: 10,
     fontSize: 14,
-    color: '#333',
+    fontFamily: 'Kanit_400Regular',
   },
   addressNote: {
     marginTop: 8,
     fontSize: 12,
-    color: '#999',
     fontStyle: 'italic',
+    fontFamily: 'Kanit_400Regular',
   },
   summarySection: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -194,27 +204,24 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#666',
+    fontFamily: 'Kanit_400Regular',
   },
   summaryValue: {
     fontSize: 16,
-    color: '#333',
+    fontFamily: 'Kanit_700Bold',
   },
   totalRow: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     paddingTop: 15,
   },
   totalLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontFamily: 'Kanit_700Bold',
   },
   totalValue: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#E91E63',
+    fontFamily: 'Kanit_700Bold',
   },
   footer: {
     position: 'absolute',
@@ -222,12 +229,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
   },
   confirmButton: {
-    backgroundColor: '#E91E63',
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
@@ -239,6 +243,6 @@ const styles = StyleSheet.create({
   confirmText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Kanit_700Bold',
   },
 });

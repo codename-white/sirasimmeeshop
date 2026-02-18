@@ -1,54 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Dimensions, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useThemeStore } from '../../src/store/useThemeStore';
 
 const { width } = Dimensions.get('window');
 
 const CATEGORIES = [
-  { id: '1', name: 'เสื้อผ้า (Apparel)', icon: 'shirt-outline', color: '#FFEBEE' },
-  { id: '2', name: 'สติกเกอร์ (Stickers)', icon: 'copy-outline', color: '#E3F2FD' },
-  { id: '3', name: 'ของสะสม (Collectibles)', icon: 'diamond-outline', color: '#F3E5F5' },
-  { id: '4', name: 'เครื่องประดับ (Accs)', icon: 'watch-outline', color: '#E8F5E9' },
-  { id: '5', name: 'ทั้งหมด (All Items)', icon: 'apps-outline', color: '#FFF3E0' },
+  { id: '1', name: 'เสื้อผ้า (Apparel)', icon: 'shirt-outline', color: 'rgba(233, 30, 99, 0.1)' },
+  { id: '2', name: 'สติกเกอร์ (Stickers)', icon: 'copy-outline', color: 'rgba(33, 150, 243, 0.1)' },
+  { id: '3', name: 'ของสะสม (Collectibles)', icon: 'diamond-outline', color: 'rgba(156, 39, 176, 0.1)' },
+  { id: '4', name: 'เครื่องประดับ (Accs)', icon: 'watch-outline', color: 'rgba(76, 175, 80, 0.1)' },
+  { id: '5', name: 'ทั้งหมด (All Items)', icon: 'apps-outline', color: 'rgba(255, 152, 0, 0.1)' },
 ];
 
 const TRENDING_KEYWORDS = ['MITH', 'Sticker', 'Limited', 'สติกเกอร์', 'เสื้อ'];
 
 export default function ExploreScreen() {
+  const { theme } = useThemeStore();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
-  const renderCategory = ({ item }: { item: typeof CATEGORIES[0] }) => (
-    <TouchableOpacity 
-      style={styles.categoryCard} 
-      onPress={() => alert(`คัดกรองหมวดหมู่ ${item.name} ครับ`)}
-    >
-      <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
-        <Ionicons name={item.icon as any} size={28} color="#333" />
-      </View>
-      <Text style={styles.categoryName} numberOfLines={1}>{item.name}</Text>
-    </TouchableOpacity>
-  );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <Stack.Screen options={{ title: 'ค้นหา', headerTitleAlign: 'center' }} />
       
       {/* Search Bar */}
-      <View style={styles.searchHeader}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#999" />
+      <View style={[styles.searchHeader, { backgroundColor: Colors[theme].background, borderBottomColor: Colors[theme].divider }]}>
+        <View style={[styles.searchBar, { backgroundColor: theme === 'dark' ? '#1E1E1E' : '#F5F5F5' }]}>
+          <Ionicons name="search" size={20} color={Colors[theme].subtext} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: Colors[theme].text }]}
             placeholder="ค้นหาสินค้าที่ต้องการ..."
+            placeholderTextColor={Colors[theme].subtext}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color="#999" />
+              <Ionicons name="close-circle" size={18} color={Colors[theme].subtext} />
             </TouchableOpacity>
           )}
         </View>
@@ -57,11 +50,23 @@ export default function ExploreScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Trending Keywords */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>คำค้นหายอดนิยม</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>คำค้นหายอดนิยม</Text>
+          </View>
           <View style={styles.keywordContainer}>
             {TRENDING_KEYWORDS.map((word, index) => (
-              <TouchableOpacity key={index} style={styles.keywordBadge} onPress={() => setSearchQuery(word)}>
-                <Text style={styles.keywordText}>{word}</Text>
+              <TouchableOpacity 
+                key={index} 
+                style={[
+                  styles.keywordBadge, 
+                  { 
+                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#F5F5F5',
+                    borderColor: Colors[theme].divider
+                  }
+                ]} 
+                onPress={() => setSearchQuery(word)}
+              >
+                <Text style={[styles.keywordText, { color: Colors[theme].subtext }]}>{word}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -70,14 +75,24 @@ export default function ExploreScreen() {
         {/* Categories Grid */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>หมวดหมู่สินค้า</Text>
+            <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>หมวดหมู่สินค้า</Text>
             <TouchableOpacity>
               <Text style={styles.seeAll}>ดูทั้งหมด</Text>
             </TouchableOpacity>
           </View>
           <FlatList
             data={CATEGORIES}
-            renderItem={renderCategory}
+            renderItem={({ item }) => (
+              <TouchableOpacity 
+                style={styles.categoryCard} 
+                onPress={() => alert(`คัดกรองหมวดหมู่ ${item.name} ครับ`)}
+              >
+                <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
+                  <Ionicons name={item.icon as any} size={28} color={Colors[theme].tint} />
+                </View>
+                <Text style={[styles.categoryName, { color: Colors[theme].text }]} numberOfLines={1}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
             keyExtractor={(item) => item.id}
             numColumns={3}
             scrollEnabled={false}
@@ -108,19 +123,15 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   searchHeader: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
@@ -129,7 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    color: '#333',
+    fontFamily: 'Kanit_400Regular',
   },
   content: {
     padding: 20,
@@ -145,9 +156,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
+    fontFamily: 'Kanit_700Bold',
   },
   keywordContainer: {
     flexDirection: 'row',
@@ -155,14 +164,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   keywordBadge: {
-    backgroundColor: '#f0f0f0',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
+    borderWidth: 1,
   },
   keywordText: {
     fontSize: 14,
-    color: '#666',
+    fontFamily: 'Kanit_400Regular',
   },
   categoryRow: {
     justifyContent: 'flex-start',
@@ -183,13 +192,12 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 12,
-    color: '#333',
     textAlign: 'center',
-    fontWeight: '500',
+    fontFamily: 'Kanit_500Medium',
   },
   seeAll: {
-    color: '#E91E63',
-    fontWeight: '600',
+    color: '#FF4081',
+    fontFamily: 'Kanit_700Bold',
   },
   promoBanner: {
     backgroundColor: '#E91E63',
@@ -205,14 +213,15 @@ const styles = StyleSheet.create({
   },
   promoTitle: {
     color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
     marginBottom: 8,
+    fontFamily: 'Kanit_700Bold',
   },
   promoSubtitle: {
     color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
     marginBottom: 15,
+    fontFamily: 'Kanit_400Regular',
   },
   shopNowBtn: {
     backgroundColor: '#fff',
@@ -223,8 +232,8 @@ const styles = StyleSheet.create({
   },
   shopNowText: {
     color: '#E91E63',
-    fontWeight: 'bold',
     fontSize: 12,
+    fontFamily: 'Kanit_700Bold',
   },
   promoIcon: {
     position: 'absolute',

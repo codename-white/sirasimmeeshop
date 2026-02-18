@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import { supabase } from '../src/services/supabase';
-import { Stack } from 'expo-router';
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { supabase } from '../src/services/supabase';
+import { useThemeStore } from '../src/store/useThemeStore';
 
 export default function OrdersScreen() {
+  const { theme } = useThemeStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,9 +56,9 @@ export default function OrdersScreen() {
   };
 
   const renderOrderItem = ({ item }: { item: any }) => (
-    <View style={styles.orderCard}>
-      <View style={styles.orderHeader}>
-        <Text style={styles.orderDate}>
+    <View style={[styles.orderCard, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+      <View style={[styles.orderHeader, { borderBottomColor: Colors[theme].divider }]}>
+        <Text style={[styles.orderDate, { color: Colors[theme].subtext }]}>
           {new Date(item.created_at).toLocaleDateString('th-TH', {
             year: 'numeric',
             month: 'long',
@@ -71,34 +74,40 @@ export default function OrdersScreen() {
 
       <View style={styles.itemsList}>
         {item.order_items.map((oi: any, index: number) => (
-          <Text key={index} style={styles.itemText} numberOfLines={1}>
+          <Text key={index} style={[styles.itemText, { color: Colors[theme].text }]} numberOfLines={1}>
             • {oi.products?.name} x {oi.quantity}
           </Text>
         ))}
       </View>
 
-      <View style={styles.orderFooter}>
-        <Text style={styles.totalLabel}>ยอดรวมทั้งหมด</Text>
-        <Text style={styles.totalValue}>{item.total_amount.toLocaleString()} ฿</Text>
+      <View style={[styles.orderFooter, { borderTopColor: Colors[theme].divider }]}>
+        <Text style={[styles.totalLabel, { color: Colors[theme].subtext }]}>ยอดรวมทั้งหมด</Text>
+        <Text style={[styles.totalValue, { color: Colors[theme].tint }]}>{item.total_amount.toLocaleString()} ฿</Text>
       </View>
     </View>
   );
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#E91E63" />
+      <View style={[styles.centered, { backgroundColor: Colors[theme].background }]}>
+        <ActivityIndicator size="large" color={Colors[theme].tint} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: 'ประวัติการสั่งซื้อ', headerTitleAlign: 'center' }} />
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <Stack.Screen options={{ 
+        title: 'ประวัติการสั่งซื้อ', 
+        headerTitleAlign: 'center',
+        headerStyle: { backgroundColor: Colors[theme].background },
+        headerTintColor: Colors[theme].text,
+        headerShadowVisible: false,
+      }} />
       {orders.length === 0 ? (
-        <View style={styles.centered}>
-          <Ionicons name="receipt-outline" size={60} color="#ccc" />
-          <Text style={styles.emptyText}>ยังไม่มีประวัติการสั่งซื้อครับ</Text>
+        <View style={[styles.centered, { backgroundColor: Colors[theme].background }]}>
+          <Ionicons name="receipt-outline" size={60} color={Colors[theme].subtext} />
+          <Text style={[styles.emptyText, { color: Colors[theme].subtext }]}>ยังไม่มีประวัติการสั่งซื้อครับ</Text>
         </View>
       ) : (
         <FlatList
@@ -117,7 +126,6 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
   },
   centered: {
     flex: 1,
@@ -129,15 +137,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   orderCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 2,
+    borderWidth: 1,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -145,12 +153,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
     paddingBottom: 8,
   },
   orderDate: {
     fontSize: 14,
-    color: '#666',
+    fontFamily: 'Kanit_400Regular',
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -160,15 +167,15 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#fff',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: 'Kanit_700Bold',
   },
   itemsList: {
     marginBottom: 12,
   },
   itemText: {
     fontSize: 14,
-    color: '#333',
     marginBottom: 4,
+    fontFamily: 'Kanit_400Regular',
   },
   orderFooter: {
     flexDirection: 'row',
@@ -176,20 +183,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   totalLabel: {
     fontSize: 14,
-    color: '#888',
+    fontFamily: 'Kanit_400Regular',
   },
   totalValue: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#E91E63',
+    fontFamily: 'Kanit_700Bold',
   },
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#888',
+    fontFamily: 'Kanit_400Regular',
   },
 });

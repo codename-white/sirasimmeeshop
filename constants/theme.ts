@@ -11,6 +11,7 @@ const tintColorDark = '#FF4081';
 export const Colors = {
   light: {
     text: '#11181C',
+    subtext: '#666666',
     background: '#FFFFFF',
     tint: tintColorLight,
     icon: '#687076',
@@ -22,9 +23,12 @@ export const Colors = {
     secondary: '#FF80AB',
     success: '#4CAF50',
     error: '#F44336',
+    skeleton: '#E1E9EE',
+    divider: 'rgba(0,0,0,0.05)',
   },
   dark: {
     text: '#ECEDEE',
+    subtext: '#999999',
     background: '#121212',
     tint: tintColorDark,
     icon: '#9BA1A6',
@@ -36,6 +40,8 @@ export const Colors = {
     secondary: '#FF4081',
     success: '#81C784',
     error: '#E57373',
+    skeleton: '#2A2A2A',
+    divider: 'rgba(255,255,255,0.1)',
   },
 };
 

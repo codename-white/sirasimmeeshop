@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { Link, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useState } from 'react';
@@ -35,9 +36,11 @@ export default function LoginScreen() {
     });
 
     if (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('เกิดข้อผิดพลาด', error.message);
       setLoading(false);
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');
     }
   }
@@ -46,8 +49,10 @@ export default function LoginScreen() {
     <View style={styles.container}>
       {/* Background Video */}
       <VideoView
+        style={styles.video}
         player={player}
-        style={styles.backgroundVideo}
+        allowsFullscreen={false}
+        allowsPictureInPicture={false}
         nativeControls={false}
         contentFit="cover"
       />
@@ -125,14 +130,15 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#121212',
   },
-  backgroundVideo: {
+  video: {
     ...StyleSheet.absoluteFillObject,
+    opacity: 0.4,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)', // Slightly dark overlay for better text readability
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   keyboardView: {
     flex: 1,
@@ -159,8 +165,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(233, 30, 99, 0.3)',
   },
   header: {
-    marginBottom: 40,
     alignItems: 'center',
+    marginTop: 80,
+    marginBottom: 50,
   },
   title: {
     fontSize: 28,
@@ -168,12 +175,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 8,
     textAlign: 'center',
+    fontFamily: 'Kanit_700Bold',
   },
   subtitle: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
     letterSpacing: 2,
-    fontWeight: '600',
+    fontFamily: 'Kanit_400Regular',
   },
   form: {
     width: '100%',
@@ -196,6 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#fff',
+    fontFamily: 'Kanit_400Regular',
   },
   button: {
     backgroundColor: '#E91E63',
@@ -218,6 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: 'Kanit_700Bold',
   },
   footer: {
     flexDirection: 'row',
@@ -227,10 +237,12 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'Kanit_400Regular',
   },
   linkText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#E91E63',
+    fontFamily: 'Kanit_700Bold',
   },
 });

@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -5,8 +6,10 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../src/services/supabase';
+import { useThemeStore } from '../src/store/useThemeStore';
 
 export default function EditProfileScreen() {
+  const { theme } = useThemeStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState('');
@@ -47,13 +50,10 @@ export default function EditProfileScreen() {
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error.message);
-      // Don't alert if it's just not found, as it might be a new user
     } finally {
       setLoading(false);
     }
   }
-
-  // ... rest of code (keeping pickImage, uploadImage, handleSave) ...
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -136,8 +136,8 @@ export default function EditProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#E91E63" />
+      <View style={[styles.centered, { backgroundColor: Colors[theme].background }]}>
+        <ActivityIndicator size="large" color={Colors[theme].tint} />
       </View>
     );
   }
@@ -145,68 +145,73 @@ export default function EditProfileScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={styles.container}
+      style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
       <Stack.Screen options={{ 
         title: 'แก้ไขโปรไฟล์', 
         headerTitleAlign: 'center',
         headerShadowVisible: false,
+        headerStyle: { backgroundColor: Colors[theme].background },
+        headerTintColor: Colors[theme].text,
       }} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.avatarSection}>
-          <TouchableOpacity onPress={pickImage} style={styles.avatarContainer} disabled={saving}>
+          <TouchableOpacity onPress={pickImage} style={[styles.avatarContainer, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]} disabled={saving}>
             {avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={50} color="#DDD" />
+                <Ionicons name="person" size={50} color={Colors[theme].subtext} />
               </View>
             )}
-            <View style={styles.editBadge}>
+            <View style={[styles.editBadge, { backgroundColor: Colors[theme].tint }]}>
               <Ionicons name="camera" size={20} color="#fff" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.avatarHint}>แตะเพื่อเปลี่ยนรูปโปรไฟล์</Text>
+          <Text style={[styles.avatarHint, { color: Colors[theme].subtext }]}>แตะเพื่อเปลี่ยนรูปโปรไฟล์</Text>
         </View>
 
         <View style={styles.formSection}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>ชื่อ-นามสกุล</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="person-outline" size={20} color="#999" style={styles.inputIcon} />
+            <Text style={[styles.label, { color: Colors[theme].subtext }]}>ชื่อ-นามสกุล</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+              <Ionicons name="person-outline" size={20} color={Colors[theme].subtext} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: Colors[theme].text }]}
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder="ชื่อของคุณ"
+                placeholderTextColor={Colors[theme].subtext}
               />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>เบอร์โทรศัพท์</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="call-outline" size={20} color="#999" style={styles.inputIcon} />
+            <Text style={[styles.label, { color: Colors[theme].subtext }]}>เบอร์โทรศัพท์</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+              <Ionicons name="call-outline" size={20} color={Colors[theme].subtext} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: Colors[theme].text }]}
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="0xx-xxx-xxxx"
+                placeholderTextColor={Colors[theme].subtext}
                 keyboardType="phone-pad"
               />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>ที่อยู่จัดส่ง</Text>
-            <View style={[styles.inputWrapper, styles.textAreaWrapper]}>
-              <Ionicons name="location-outline" size={20} color="#999" style={[styles.inputIcon, { marginTop: 12 }]} />
+            <Text style={[styles.label, { color: Colors[theme].subtext }]}>ที่อยู่จัดส่ง</Text>
+            <View style={[styles.inputWrapper, styles.textAreaWrapper, { backgroundColor: Colors[theme].card, borderColor: Colors[theme].divider }]}>
+              <Ionicons name="location-outline" size={20} color={Colors[theme].subtext} style={[styles.inputIcon, { marginTop: 12 }]} />
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { color: Colors[theme].text }]}
                 value={address}
                 onChangeText={setAddress}
                 placeholder="บ้านเลขที่, ถนน, แขวง/ตำบล..."
+                placeholderTextColor={Colors[theme].subtext}
                 multiline
                 numberOfLines={4}
               />
@@ -214,7 +219,7 @@ export default function EditProfileScreen() {
           </View>
 
           <TouchableOpacity 
-            style={[styles.saveButton, saving && styles.disabledButton]} 
+            style={[styles.saveButton, saving && styles.disabledButton, { backgroundColor: Colors[theme].tint, shadowColor: Colors[theme].tint }]} 
             onPress={handleSave}
             disabled={saving}
           >
@@ -233,7 +238,6 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   centered: {
     flex: 1,
@@ -252,12 +256,10 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#F5F5F5',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     borderWidth: 1,
-    borderColor: '#EEE',
   },
   avatar: {
     width: 120,
@@ -272,7 +274,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#E91E63',
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   avatarHint: {
     marginTop: 12,
     fontSize: 14,
-    color: '#999',
+    fontFamily: 'Kanit_400Regular',
   },
   formSection: {
     width: '100%',
@@ -294,20 +295,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    fontFamily: 'Kanit_700Bold',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9F9F9',
     borderRadius: 15,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
   },
   inputIcon: {
     marginRight: 10,
@@ -316,7 +314,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 56,
     fontSize: 16,
-    color: '#333',
+    fontFamily: 'Kanit_400Regular',
   },
   textAreaWrapper: {
     alignItems: 'flex-start',
@@ -327,13 +325,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   saveButton: {
-    backgroundColor: '#E91E63',
     height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#E91E63',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 15,
@@ -345,7 +341,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: 'Kanit_700Bold',
   },
 });

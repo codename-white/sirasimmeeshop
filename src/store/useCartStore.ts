@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { Product } from '../types';
 
 interface CartItem extends Product {
@@ -26,12 +26,24 @@ export const useCartStore = create<CartState>()(
         const existingItem = currentItems.find((item) => item.id === product.id);
 
         if (existingItem) {
+          if (existingItem.quantity >= product.stock) {
+            import('react-native').then(({ Alert }) => {
+              Alert.alert('ขออภัยครับ', `สินค้าชิ้นนี้มีในสต็อกเพียง ${product.stock} ชิ้นครับ`);
+            });
+            return;
+          }
           set({
             items: currentItems.map((item) =>
               item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
             ),
           });
         } else {
+          if (product.stock <= 0) {
+            import('react-native').then(({ Alert }) => {
+              Alert.alert('สินค้าหมด', 'ขออภัยครับ สินค้าชิ้นนี้หมดชั่วคราวครับ');
+            });
+            return;
+          }
           set({ items: [...currentItems, { ...product, quantity: 1 }] });
         }
       },
@@ -41,10 +53,21 @@ export const useCartStore = create<CartState>()(
         });
       },
       updateQuantity: (productId: string, quantity: number) => {
+        const item = get().items.find(i => i.id === productId);
+        if (!item) return;
+
         if (quantity <= 0) {
           get().removeItem(productId);
           return;
         }
+
+        if (quantity > item.stock) {
+          import('react-native').then(({ Alert }) => {
+            Alert.alert('ขออภัยครับ', `ขอโทษครับ สินค้าชิ้นนี้มีในสต็อกเพียง ${item.stock} ชิ้นครับ`);
+          });
+          return;
+        }
+
         set({
           items: get().items.map((item) =>
             item.id === productId ? { ...item, quantity } : item

@@ -1,9 +1,14 @@
+import { Colors } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ProductCard } from '../../src/components/products/ProductCard';
+import { ProductSkeleton } from '../../src/components/ui/ProductSkeleton';
+import { Skeleton } from '../../src/components/ui/Skeleton';
 import { supabase } from '../../src/services/supabase';
+import { useThemeStore } from '../../src/store/useThemeStore';
 import { Product } from '../../src/types';
 
 const { width } = Dimensions.get('window');
@@ -11,6 +16,7 @@ const { width } = Dimensions.get('window');
 const bannerVideoSource = 'https://lsctinvlisgyasqgmivm.supabase.co/storage/v1/object/sign/shop/gapbo.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wOGE3NWJjNS0wNjdjLTRjM2MtYTNhOC0zZGI3OGY2YjNlYTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzaG9wL2dhcGJvLm1wNCIsImlhdCI6MTc3MTMxNDYxOSwiZXhwIjoxODAyODUwNjE5fQ.FShkNYrdy60smeArEgRzgYLvJctfULQWBQFxlZQBHdM';
 
 export default function HomeScreen() {
+  const { theme } = useThemeStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -47,23 +53,36 @@ export default function HomeScreen() {
     router.push(`/product/${product.id}`);
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#E91E63" />
+      <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+        <View style={styles.header}>
+          <Skeleton width="40%" height={20} style={{ marginBottom: 8 }} />
+          <Skeleton width="70%" height={40} style={{ marginBottom: 20 }} />
+          <Skeleton height={200} borderRadius={24} style={{ marginBottom: 30 }} />
+          <Skeleton width="60%" height={30} style={{ marginBottom: 15 }} />
+        </View>
+        <View style={styles.columnWrapper}>
+          <ProductSkeleton />
+          <ProductSkeleton />
+        </View>
+        <View style={styles.columnWrapper}>
+          <ProductSkeleton />
+          <ProductSkeleton />
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <FlatList
         data={products}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.welcomeText}>ยินดีต้อนรับสู่</Text>
-            <Text style={styles.brandText}>Shopsirasimmee 🍿</Text>
+            <Text style={[styles.welcomeText, { color: Colors[theme].subtext }]}>ยินดีต้อนรับสู่</Text>
+            <Text style={[styles.shopName, { color: Colors[theme].text }]}>Shopsirasimmee 🍿</Text>
             
             <View style={styles.bannerContainer}>
               <VideoView
@@ -72,14 +91,20 @@ export default function HomeScreen() {
                 nativeControls={false}
                 contentFit="cover"
               />
-              <View style={styles.bannerOverlay} />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.8)']}
+                style={styles.bannerOverlay}
+              />
               <View style={styles.bannerContent}>
+                <View style={styles.newBadge}>
+                  <Text style={styles.newBadgeText}>NEW ARRIVAL</Text>
+                </View>
                 <Text style={styles.bannerTitle}>ของสะสมสุดพิเศษ!</Text>
                 <Text style={styles.bannerSubtitle}>คอลเลกชันใหม่ล่าสุดจาก MITH</Text>
               </View>
             </View>
             
-            <Text style={styles.sectionTitle}>สินค้าแนะนำสำหรับคุณ</Text>
+            <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>สินค้าแนะนำสำหรับคุณ</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -97,7 +122,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   centered: {
     flex: 1,
@@ -106,41 +130,54 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
+    paddingTop: 60,
+    backgroundColor: 'transparent',
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 4,
+    fontFamily: 'Kanit_400Regular',
   },
-  brandText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
+  shopName: {
+    fontSize: 32,
+    fontFamily: 'Kanit_700Bold',
+    marginTop: 4,
   },
   bannerContainer: {
-    height: 180,
-    borderRadius: 20,
+    height: 200,
+    borderRadius: 24,
     overflow: 'hidden',
-    marginBottom: 25,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
+    marginBottom: 30,
+    elevation: 10,
+    shadowColor: '#E91E63',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
-    shadowRadius: 10,
+    shadowRadius: 15,
   },
   bannerVideo: {
     ...StyleSheet.absoluteFillObject,
   },
   bannerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  newBadge: {
+    backgroundColor: '#E91E63',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  newBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    fontFamily: 'Kanit_700Bold',
+    letterSpacing: 1,
   },
   bannerContent: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 20,
+    justifyContent: 'flex-end',
+    padding: 24,
   },
   bannerTitle: {
     color: '#fff',
@@ -150,6 +187,7 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+    fontFamily: 'Kanit_700Bold',
   },
   bannerSubtitle: {
     color: 'rgba(255, 255, 255, 0.9)',
@@ -158,18 +196,21 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+    fontFamily: 'Kanit_400Regular',
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 15,
+    paddingHorizontal: 16,
+    fontFamily: 'Kanit_700Bold',
+    letterSpacing: -0.5,
   },
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   columnWrapper: {
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
   },
 });
