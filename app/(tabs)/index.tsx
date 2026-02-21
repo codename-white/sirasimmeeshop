@@ -13,7 +13,7 @@ import { Product } from '../../src/types';
 
 const { width } = Dimensions.get('window');
 
-const bannerVideoSource = 'https://lsctinvlisgyasqgmivm.supabase.co/storage/v1/object/sign/shop/gapbo.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wOGE3NWJjNS0wNjdjLTRjM2MtYTNhOC0zZGI3OGY2YjNlYTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzaG9wL2dhcGJvLm1wNCIsImlhdCI6MTc3MTMxNDYxOSwiZXhwIjoxODAyODUwNjE5fQ.FShkNYrdy60smeArEgRzgYLvJctfULQWBQFxlZQBHdM';
+const bannerVideoSource = require('../../assets/simmee/gapbo.mp4');
 
 export default function HomeScreen() {
   const { theme } = useThemeStore();
